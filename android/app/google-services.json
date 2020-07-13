@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "657646711618",
+    "firebase_url": "https://ecashpay.firebaseio.com",
+    "project_id": "ecashpay",
+    "storage_bucket": "ecashpay.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:657646711618:android:3b99741201925fbb9b8edb",
+        "android_client_info": {
+          "package_name": "com.ecash.ecashpay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "657646711618-2ii3h8vh4m5qatrfkst4h3rum6b0vltu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ecash.ecashpay",
+            "certificate_hash": "aa360c9712b430a57c7359f264704e014339eda7"
+          }
+        },
+        {
+          "client_id": "657646711618-nccrv89fjt9crtia4uepn7l5pkvsgsq7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJklKWBnmwFbwDKuI4qK7uFLL0y3mEkQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "657646711618-nccrv89fjt9crtia4uepn7l5pkvsgsq7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
