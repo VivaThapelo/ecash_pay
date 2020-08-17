@@ -5,8 +5,10 @@ class Tranxaction {
   Tranxaction(
       {@required this.txSourceID,
       @required this.txSourceName,
+      @required this.txSourcePhoto,
       @required this.txDestinationID,
       @required this.txDestinationName,
+      @required this.txDestinationPhoto,
       @required this.txAmount,
       @required this.txFee,
       this.txLocation,
@@ -22,8 +24,10 @@ class Tranxaction {
   DateTime txDatetime;
   String txDestinationID;
   String txDestinationName;
+  String txDestinationPhoto;
   String txSourceID;
   String txSourceName;
+  String txSourcePhoto;
   GeoPoint txLocation;
   String txMethod;
   String txStatus;
@@ -38,8 +42,10 @@ class Tranxaction {
       "txDatetime": this.txDatetime ?? DateTime.now(),
       "txDestinationID": this.txDestinationID,
       "txDestinationName": this.txDestinationName,
+      "txDestinationPhoto": this.txDestinationPhoto,
       "txSourceID": this.txSourceID,
       "txSourceName": this.txSourceName,
+      "txSourcePhoto": this.txSourcePhoto,
       "txLocation": this.txLocation ?? new GeoPoint(0.0, 0.0),
       "txMethod": this.txMethod ?? "Card",
       "txStatus": this.txStatus,

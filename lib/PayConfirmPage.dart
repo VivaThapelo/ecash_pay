@@ -95,24 +95,9 @@ class PayConfirmPageState extends State<PayConfirmPage> {
                 fontSize: 20,
                 fontWeight: FontWeight.bold)),
         elevation: 0,
-        actions: <Widget>[
-          FlatButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => MyHomePage(
-                              currentUser: currentUser,
-                            )));
-              },
-              child: Text(
-                'Done',
-                style:
-                    TextStyle(color: Colors.brown, fontWeight: FontWeight.bold),
-              ))
-        ],
       ),
       body: SafeArea(
+        minimum: EdgeInsets.all(16.0),
         child: Container(
           padding: EdgeInsets.all(0),
           margin: EdgeInsets.all(0),
@@ -133,6 +118,29 @@ class PayConfirmPageState extends State<PayConfirmPage> {
                 Text(
                   _reason,
                   style: TextStyle(fontSize: 18),
+                ),
+                Divider(
+                  height: 48,
+                  color: Colors.white,
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: FlatButton(
+                      padding: EdgeInsets.symmetric(vertical: 4.0),
+                      color: Colors.brown,
+                      child: Text(
+                        "GO BACK",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MyHomePage(
+                                      currentUser: currentUser,
+                                    )));
+                      }),
                 )
               ],
             ),

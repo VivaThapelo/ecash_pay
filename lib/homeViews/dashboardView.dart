@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-enum userActions { Payment, Withdrawal, Send }
+enum userActions { Payment, Withdrawal, Send, Scan }
 
 class DashboardView extends StatefulWidget {
   final FirebaseUser currentUser;
@@ -25,13 +25,17 @@ class DashboardView extends StatefulWidget {
 class DashboardViewState extends State<DashboardView> {
   FirebaseUser currentUser;
   PageController pageViewController;
+  final GlobalKey<AnimatedListState> _animListKey =
+      new GlobalKey<AnimatedListState>();
 
   //final GlobalKey _popUpKey = new GlobalKey(); // this is a global key for popup
   var timeFormat = new DateFormat("H:mm dd MMM yy");
   bool _cardLoad = false;
-  String _qrCodeOfInput = "074 752 3324";
   CreatorController _creatorController;
   String userAction;
+  double cardWidth = 30.0;
+  double cardHeight = 30.0;
+  MainAxisSize _mainAxisSize = MainAxisSize.min;
 
   TextEditingController _cardNumberController,
       _cardHolderController,
@@ -54,12 +58,24 @@ class DashboardViewState extends State<DashboardView> {
     setState(() {
       getCardDetails();
     });
+    Future.delayed(Duration(milliseconds: 500), () {
+      setState(() {
+        cardHeight = 210.0;
+        cardWidth = double.maxFinite;
+        _mainAxisSize = MainAxisSize.max;
+      });
+    });
+    Future.delayed(Duration(milliseconds: 1000), () {
+      setState(() {
+        _animListKey.currentState.insertItem(0);
+      });
+    });
   }
 
   Widget _transactionsListItem(DocumentSnapshot transaction) {
     return new ListTile(
       leading: new CircleAvatar(
-        backgroundImage: new AssetImage("assets/images/smartwatch.jpg"),
+        backgroundImage: NetworkImage(transaction['txDestinationPhoto']),
       ),
       title: new Text(
         transaction['txDestinationName'].toString(),
@@ -120,8 +136,7 @@ class DashboardViewState extends State<DashboardView> {
                   fontSize: 20,
                   fontWeight: FontWeight.bold)),
           elevation: 0,
-          actions: <Widget>[
-            /*
+          /* actions: <Widget>[
             FlatButton(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
               onPressed: () {
@@ -129,6 +144,7 @@ class DashboardViewState extends State<DashboardView> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => WalletView(
+                              pageViewController: pageViewController,
                               currentUser: currentUser,
                             )));
               },
@@ -174,7 +190,10 @@ class DashboardViewState extends State<DashboardView> {
                               initialValue: currentUser.uid,
                             ),
                           ),
-                          Text('074 752 3324'),
+                          Text(
+                            currentUser.uid,
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ],
                       ),
                       actions: <Widget>[
@@ -194,142 +213,147 @@ class DashboardViewState extends State<DashboardView> {
                 });
               },
             ),
-            */
-          ],
+          ],*/
         ),
         //BAnk Card Section
-        GestureDetector(
-          child: new Container(
-              decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 7,
-                      offset: Offset(0, 3), // changes position of shadow
-                    ),
-                  ],
-                  gradient: SweepGradient(colors: [
-                    Colors.purple,
-                    Colors.teal,
-                    Colors.yellow,
-                    Colors.lightBlue,
-                    Colors.teal,
-                    Colors.yellow,
-                    Colors.purple,
-                  ]),
-                  borderRadius: BorderRadius.all(Radius.circular(10))),
-              margin: EdgeInsets.only(left: 16, right: 16, top: 0, bottom: 8),
-              child: Padding(
-                padding:
-                    EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 10),
-                child: new Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text("BankCard",
-                                style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white)),
-                            /*  Text(
+        AnimatedContainer(
+          // height: cardHeight,
+          // width: cardWidth,
+          duration: Duration(milliseconds: 500),
+          //curve: Curves.fastOutSlowIn,
+          child: GestureDetector(
+            child: new Container(
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3), // changes position of shadow
+                      ),
+                    ],
+                    gradient: SweepGradient(colors: [
+                      Colors.purple,
+                      Colors.teal,
+                      Colors.yellow,
+                      Colors.lightBlue,
+                      Colors.teal,
+                      Colors.yellow,
+                      Colors.purple,
+                    ]),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                margin: EdgeInsets.only(left: 16, right: 16, top: 0, bottom: 8),
+                child: Padding(
+                  padding:
+                  EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 10),
+                  child: new Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text("BankCard",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white)),
+                              /*  Text(
                               "162****151",
                               style: TextStyle(
                                   color: Colors.white, letterSpacing: 2),
                             )*/
-                          ],
-                        ),
-                        Image.asset(
-                          "assets/images/card/master.png",
-                          width: 70,
-                          height: 50,
-                        ),
-                      ],
-                    ),
-                    Divider(
-                      height: 24,
-                      color: Colors.transparent,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          "Card Number",
-                          style: TextStyle(
-                              fontSize: 9,
-                              color: Colors.white,
-                              letterSpacing: 2),
-                        ),
-                        Text(
-                          bankCard.getCardNumber(true) ??
-                              "**** **** **** ****", // cardNumber
-                          style: TextStyle(
-                              fontSize: 24,
-                              letterSpacing: 4,
-                              color: Colors.white),
-                        ),
-                      ],
-                    ),
-                    Divider(
-                      height: 24,
-                      color: Colors.transparent,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        new Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              "Card Holder",
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  color: Colors.white,
-                                  letterSpacing: 2),
-                            ),
-                            Text(bankCard.getCardHolder() ?? "**** *******",
+                            ],
+                          ),
+                          Image.asset(
+                            "assets/images/card/master.png",
+                            width: 70,
+                            height: 50,
+                          ),
+                        ],
+                      ),
+                      Divider(
+                        height: 24,
+                        color: Colors.transparent,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            "Card Number",
+                            style: TextStyle(
+                                fontSize: 9,
+                                color: Colors.white,
+                                letterSpacing: 2),
+                          ),
+                          Text(
+                            bankCard.getCardNumber(true) ??
+                                "**** **** **** ****", // cardNumber
+                            style: TextStyle(
+                                fontSize: 24,
+                                letterSpacing: 4,
+                                color: Colors.white),
+                          ),
+                        ],
+                      ),
+                      Divider(
+                        height: 24,
+                        color: Colors.transparent,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          new Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                "Card Holder",
                                 style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 9,
                                     color: Colors.white,
-                                    letterSpacing: 1))
-                          ],
-                        ),
-                        new Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              "Expires",
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  color: Colors.white,
-                                  letterSpacing: 2),
-                            ),
-                            Text(bankCard.getCardExpires() ?? "**/**",
+                                    letterSpacing: 2),
+                              ),
+                              Text(bankCard.getCardHolder() ?? "**** *******",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                      letterSpacing: 1))
+                            ],
+                          ),
+                          new Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                "Expires",
                                 style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 9,
                                     color: Colors.white,
-                                    letterSpacing: 2))
-                          ],
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              )),
-          onTap: () {
-            setState(() {
-              cardUpdateDialog();
-            });
-          },
+                                    letterSpacing: 2),
+                              ),
+                              Text(bankCard.getCardExpires() ?? "**/**",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                      letterSpacing: 2))
+                            ],
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                )),
+            onTap: () {
+              setState(() {
+                cardUpdateDialog();
+              });
+            },
+          ),
         ),
         new Row(
           mainAxisSize: MainAxisSize.max,
@@ -427,9 +451,13 @@ class DashboardViewState extends State<DashboardView> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => TransactionsView(
-                                pageViewController: pageViewController,
-                                currentUser: currentUser)));
+                            builder: (context) =>
+                                TransactionsView(
+                                    pageViewController: pageViewController,
+                                    currentUser: currentUser)));
+                    /* pageViewController.animateToPage(1,
+                        duration: Duration(milliseconds: 30),
+                        curve: Curves.easeOutCubic);*/
                   })
             ],
           ),
@@ -443,10 +471,11 @@ class DashboardViewState extends State<DashboardView> {
           builder: (context, snapshot) {
             if (snapshot.hasError) return const Text('Snapshot error!');
             if (!snapshot.hasData) return const Text('Loading...');
-            return ListView.builder(
+            return AnimatedList(
+                key: _animListKey,
                 shrinkWrap: true,
-                itemCount: snapshot.data.documents.length,
-                itemBuilder: (context, index) {
+                initialItemCount: 0,
+                itemBuilder: (context, index, animation) {
                   return _transactionsListItem(snapshot.data.documents[index]);
                 });
           },
@@ -459,156 +488,158 @@ class DashboardViewState extends State<DashboardView> {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text('Card Details'),
-                Visibility(
-                  child: CircularProgressIndicator(),
-                  visible: _cardLoad,
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Form(
-                    child: ListView(
-                  shrinkWrap: true,
-                  children: <Widget>[
-                    TextFormField(
-                      maxLengthEnforced: true,
-                      maxLength: 19,
-                      keyboardType: TextInputType.number,
-                      controller: _cardNumberController,
-                      onChanged: (value) {
-                        switch (value.length) {
-                          case 4:
-                            {
-                              _cardNumberController.text += " ";
-                              _cardNumberController.selection =
-                                  TextSelection.collapsed(offset: 5);
-                              break;
-                            }
-                          case 9:
-                            {
-                              _cardNumberController.text += " ";
-                              _cardNumberController.selection =
-                                  TextSelection.collapsed(offset: 10);
-                              break;
-                            }
-                          case 14:
-                            {
-                              _cardNumberController.text += " ";
-                              _cardNumberController.selection =
-                                  TextSelection.collapsed(offset: 15);
-                              break;
-                            }
-                        }
-                        return null;
-                      },
-                      decoration: InputDecoration(
-                          hintText: '5324 9087 5432 1234',
-                          labelText: 'Card Number'),
-                    ),
-                    TextFormField(
-                      textCapitalization: TextCapitalization.words,
-                      keyboardType: TextInputType.text,
-                      controller: _cardHolderController,
-                      decoration: InputDecoration(
-                          hintText: 'John Doe', labelText: 'Card holder'),
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: TextFormField(
-                            autovalidate: true,
-                            validator: (value) {
-                              if (value.length >= 3 &&
-                                  int.parse(value.split("/")[0]) > 12) {
-                                // months over 12
-                                return "Month greater than 12";
-                              } else if (value.length == 5 &&
-                                  int.parse(value.split("/")[1]) <= 20) {
-                                // card expired
-                                return "Year less than 20";
-                              }
-                              return null;
-                            },
-                            onChanged: (value) {
-                              if (value.length == 2) {
-                                _expiresController.text = value + "/";
-                                _expiresController.selection =
-                                    TextSelection.collapsed(offset: 3);
-                              }
-                              return null;
-                            },
-                            keyboardType: TextInputType.number,
-                            controller: _expiresController,
-                            decoration: InputDecoration(
-                                hintText: '12/20', labelText: 'Expires'),
-                            maxLength: 5,
+          return StatefulBuilder(builder: (context, StateSetter dialogState) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('Card Details'),
+                  Visibility(
+                    child: CircularProgressIndicator(),
+                    visible: _cardLoad,
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Form(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: <Widget>[
+                          TextFormField(
                             maxLengthEnforced: true,
+                            maxLength: 19,
+                            keyboardType: TextInputType.number,
+                            controller: _cardNumberController,
+                            onChanged: (value) {
+                              switch (value.length) {
+                                case 4:
+                                  {
+                                    _cardNumberController.text += " ";
+                                    _cardNumberController.selection =
+                                        TextSelection.collapsed(offset: 5);
+                                    break;
+                                  }
+                                case 9:
+                                  {
+                                    _cardNumberController.text += " ";
+                                    _cardNumberController.selection =
+                                        TextSelection.collapsed(offset: 10);
+                                    break;
+                                  }
+                                case 14:
+                                  {
+                                    _cardNumberController.text += " ";
+                                    _cardNumberController.selection =
+                                        TextSelection.collapsed(offset: 15);
+                                    break;
+                                  }
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                                hintText: '5324 9087 5432 1234',
+                                labelText: 'Card Number'),
                           ),
-                        ),
-                        Divider(
-                          indent: 16,
-                        ),
-                        Expanded(
-                            child: TextFormField(
-                          maxLengthEnforced: true,
-                          maxLength: 3,
-                          keyboardType: TextInputType.number,
-                          controller: _cvvController,
-                          decoration: InputDecoration(
-                              hintText: '123', labelText: 'CVV'),
-                        )),
-                      ],
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    )
-                  ],
-                ))
-              ],
-            ),
-            actions: <Widget>[
-              FlatButton(
-                  onPressed: () {
-                    _cvvController.clear();
-                    _expiresController.clear();
-                    _cardHolderController.clear();
-                    _cardNumberController.clear();
-                    Navigator.pop(context);
-                  },
-                  child: Text('Cancel')),
-              FlatButton(
-                  onPressed: () {
-                    setState(() {
-                      _cardLoad = true;
-                    });
-                    bankCard = new BankCard(
-                        cardNumber: _cardNumberController.text,
-                        cardHolder: _cardHolderController.text,
-                        cardExpires: _expiresController.text,
-                        cardCVV: _cvvController.text);
-                    bankCard.setBankCard();
-                    setState(() {
-                      //TODO: Logic for update card on Dashboard
-                      getCardDetails();
-                      Future.delayed(const Duration(seconds: 3), () {
-                        Navigator.pop(context);
+                          TextFormField(
+                            textCapitalization: TextCapitalization.words,
+                            keyboardType: TextInputType.text,
+                            controller: _cardHolderController,
+                            decoration: InputDecoration(
+                                hintText: 'John Doe', labelText: 'Card holder'),
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: TextFormField(
+                                  autovalidate: true,
+                                  validator: (value) {
+                                    if (value.length >= 3 &&
+                                        int.parse(value.split("/")[0]) > 12) {
+                                      // months over 12
+                                      return "Month greater than 12";
+                                    } else if (value.length == 5 &&
+                                        int.parse(value.split("/")[1]) <= 20) {
+                                      // card expired
+                                      return "Year less than 20";
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: (value) {
+                                    if (value.length == 2) {
+                                      _expiresController.text = value + "/";
+                                      _expiresController.selection =
+                                          TextSelection.collapsed(offset: 3);
+                                    }
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.number,
+                                  controller: _expiresController,
+                                  decoration: InputDecoration(
+                                      hintText: '12/20', labelText: 'Expires'),
+                                  maxLength: 5,
+                                  maxLengthEnforced: true,
+                                ),
+                              ),
+                              Divider(
+                                indent: 16,
+                              ),
+                              Expanded(
+                                  child: TextFormField(
+                                    maxLengthEnforced: true,
+                                    maxLength: 3,
+                                    keyboardType: TextInputType.number,
+                                    controller: _cvvController,
+                                    decoration: InputDecoration(
+                                        hintText: '123', labelText: 'CVV'),
+                                  )),
+                            ],
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          )
+                        ],
+                      ))
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                    onPressed: () {
+                      _cvvController.clear();
+                      _expiresController.clear();
+                      _cardHolderController.clear();
+                      _cardNumberController.clear();
+                      Navigator.pop(context);
+                    },
+                    child: Text('Cancel')),
+                FlatButton(
+                    onPressed: () {
+                      dialogState(() {
+                        _cardLoad = true;
                       });
-                    });
-                    //
-                    //Navigator.pop(context);
-                  },
-                  child: Text(
-                    'Update',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ))
-            ],
-          );
+                      bankCard = new BankCard(
+                          cardNumber: _cardNumberController.text,
+                          cardHolder: _cardHolderController.text,
+                          cardExpires: _expiresController.text,
+                          cardCVV: _cvvController.text);
+                      bankCard.setBankCard();
+                      setState(() {
+                        //TODO: Logic for update card on Dashboard
+                        getCardDetails();
+                        Future.delayed(const Duration(seconds: 3), () {
+                          Navigator.pop(context);
+                        });
+                      });
+                      //
+                      //Navigator.pop(context);
+                    },
+                    child: Text(
+                      'Update',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ))
+              ],
+            );
+          });
         });
   }
 

@@ -1,11 +1,19 @@
+import 'package:ecashpay/CreatePinPage.dart';
+import 'package:ecashpay/FeesLimits.dart';
 import 'package:ecashpay/ProfilePage.dart';
+import 'package:ecashpay/homeViews/ScanView.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'homeViews/beneficiariesView.dart';
 import 'homeViews/dashboardView.dart';
 import 'homeViews/transactionsView.dart';
 import 'homeViews/walletView.dart';
+
+enum userActions { Payment, Withdrawal, Send, Scan }
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title, @required this.currentUser})
@@ -19,6 +27,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   FirebaseUser currentUser;
+  StorageReference storageReference;
+  String proPic = "https://imgur.com/gallery/znlz0.jpg";
+  String placeholderURL = "https://imgur.com/gallery/znlz0.jpg";
   int _viewIndex = 0; // this is the first view of the PageView
   PageController _pageViewController = new PageController(
       initialPage: 0, // this is the first view of the PageView
@@ -34,10 +45,79 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  showResetPop() {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text('Reset Pin'),
+              content:
+                  Text("Are you sure? \n\n This action can't be reversed."),
+              actions: [
+                FlatButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('No, Cancel')),
+                FlatButton(
+                    onPressed: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      prefs.setString('appPin', ''); // emptied out the APP pin
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  CreatePinPage(currentUser: currentUser)));
+                    },
+                    child: Text(
+                      'Yes, Reset',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    )),
+              ],
+            ));
+  }
+
+  _launchURL() async {
+    const url = 'https://flutter.dev';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    print("MyHomePage: " + "Works well");
     currentUser = widget.currentUser;
+    storageReference = FirebaseStorage.instance.ref();
+    getPlaceholder();
+    getProPic();
+  }
+
+  getPlaceholder() async {
+    print("getPlaceHolder:" + "runs");
+    String response = await storageReference
+        .child('profileImages')
+        .child('thumb')
+        .child('profile-placeholder_200x200.png')
+        .getDownloadURL();
+    setState(() {
+      placeholderURL = response;
+    });
+  }
+
+  getProPic() async {
+    print("getProPic:" + "runs");
+    String response = await storageReference
+        .child('profileImages')
+        .child('thumb')
+        .child('${currentUser.uid}_200x200.png')
+        .getDownloadURL();
+    setState(() {
+      proPic = response;
+    });
   }
 
   @override
@@ -53,8 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
               accountName: Text(currentUser.displayName ?? "No Name Yet"),
               accountEmail: Text(currentUser.phoneNumber ?? "No Number Yet"),
               currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage(currentUser.photoUrl ??
-                    "assets/images/camera_placeholder.png"),
+                backgroundImage: NetworkImage(proPic ?? placeholderURL),
               ),
               onDetailsPressed: () {
                 Navigator.push(
@@ -76,33 +155,59 @@ class _MyHomePageState extends State<MyHomePage> {
                     Icons.home,
                     color: Colors.brown,
                   ),
+                  onTap: () {
+                    _pageViewController.animateToPage(0,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.easeInCubic);
+                    Navigator.pop(context);
+                  },
                 ),
                 ListTile(
-                  onTap: () {},
                   title: Text(
-                    'Update Card',
+                    'Fees & Limits',
                     style: TextStyle(color: Colors.brown),
                   ),
                   leading: Icon(
-                    Icons.credit_card,
+                    Icons.attach_money,
                     color: Colors.brown,
                   ),
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => FeesLimits()));
+                  },
                 ),
                 ListTile(
                   title: Text(
-                    'Create New Pin',
+                    'Reset Pin',
                     style: TextStyle(color: Colors.brown),
                   ),
                   leading: Icon(
                     Icons.security,
                     color: Colors.brown,
                   ),
+                  onTap: () => showResetPop(),
                 )
               ],
             ),
             AboutListTile(
               applicationName: "eCash Pay",
               applicationVersion: "0.1",
+            ),
+            ListTile(
+              title: Text(
+                'Own a Shop?',
+                style: TextStyle(color: Colors.brown),
+              ),
+              subtitle: Text(
+                "Download the Merchant App",
+                style: TextStyle(fontSize: 13),
+              ),
+              leading: Icon(
+                Icons.store,
+                size: 42,
+                color: Colors.brown,
+              ),
+              onTap: () => _launchURL(),
             )
           ],
         ),
@@ -120,16 +225,23 @@ class _MyHomePageState extends State<MyHomePage> {
             pageViewController: _pageViewController,
             currentUser: currentUser,
           ),
-          /* ScanView(
+          ScanView(
             pageViewController: _pageViewController,
-            userAction: widget.,
-          ), */
-          BeneficiariesView(),
-          WalletView()
+            userAction: userActions.Scan.toString(),
+            currentUser: currentUser,
+          ),
+          BeneficiariesView(
+            currentUser: currentUser,
+            pageViewController: _pageViewController,
+          ),
+          WalletView(
+            currentUser: currentUser,
+            pageViewController: _pageViewController,
+          )
         ],
       ),
-      /*
-      bottomNavigationBar: new Stack(
+
+      /*  bottomNavigationBar: new Stack(
         overflow: Overflow.visible,
         children: <Widget>[
           new Positioned(
@@ -157,7 +269,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     )),
                 new BottomNavigationBarItem(
                     icon: new Icon(Icons.center_focus_weak),
-                    title: new Text("PAY")),
+                    title: new Text("scan")),
                 new BottomNavigationBarItem(
                     icon: new Icon(Icons.people),
                     title: new Text(
@@ -199,14 +311,13 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           new Positioned.directional(
             textDirection: TextDirection.ltr,
-            child: new Text("PAY",
+            child: new Text("scan",
                 style: new TextStyle(color: Colors.white, fontSize: 12.0)),
             bottom: 8.0,
           )
         ],
         alignment: Alignment.bottomCenter,
-      ),
-      */
+      ), */
       // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

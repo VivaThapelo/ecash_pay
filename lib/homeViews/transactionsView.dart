@@ -75,50 +75,50 @@ class TransactionsViewState extends State<TransactionsView> {
 
   @override
   Widget build(BuildContext context) {
-    return new ListView(
-      children: <Widget>[
-        AppBar(
-          leading: new IconButton(
-            icon: new Icon(Icons.arrow_back, color: Colors.brown),
-            onPressed: () {
-              setState(() {
-                Navigator.pop(context);
-              });
-            },
-          ),
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text("Transactions"),
-          backgroundColor: Colors.white,
-          iconTheme: IconThemeData(color: Colors.brown),
-          textTheme: TextTheme(
-              headline6: TextStyle(
-                  color: Colors.brown,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold)),
-          elevation: 0,
+    return new Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        leading: new IconButton(
+          icon: new Icon(Icons.arrow_back, color: Colors.brown),
+          onPressed: () {
+            setState(() {
+              Navigator.pop(context);
+            });
+          },
         ),
-        Material(
-          child: new StreamBuilder(
-            stream: Firestore.instance
-                .collection('transactions')
-                .orderBy('txDatetime', descending: false)
-                .limit(15)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) return const Text('Snapshot error!');
-              if (!snapshot.hasData) return const Text('Loading...');
-              return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: snapshot.data.documents.length,
-                  itemBuilder: (context, index) {
-                    return _transactionsListItem(
-                        snapshot.data.documents[index]);
-                  });
-            },
-          ),
-        )
-      ],
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text("Transactions"),
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.brown),
+        textTheme: TextTheme(
+            headline6: TextStyle(
+                color: Colors.brown,
+                fontSize: 20,
+                fontWeight: FontWeight.bold)),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+      ),
+      body: new StreamBuilder(
+        stream: Firestore.instance
+            .collection('transactions')
+            .orderBy('txDatetime', descending: false)
+            .limit(15)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) return const Text('Snapshot error!');
+          if (!snapshot.hasData)
+            return const Center(
+              child: Text('Loading...'),
+            );
+          return ListView.builder(
+              shrinkWrap: true,
+              itemCount: snapshot.data.documents.length,
+              itemBuilder: (context, index) {
+                return _transactionsListItem(snapshot.data.documents[index]);
+              });
+        },
+      ),
     );
   }
 }

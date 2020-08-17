@@ -9,6 +9,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 class SecureView extends StatefulWidget {
   SecureView(
       {Key key,
+      this.transRef,
       @required this.currentUser,
       @required this.pageViewController,
       @required this.RedirectUrl,
@@ -16,9 +17,9 @@ class SecureView extends StatefulWidget {
       @required this.PAYGATE_ID,
       @required this.CHECKSUM})
       : super(key: key);
-  String transRef;
-  FirebaseUser currentUser;
-  PageController pageViewController;
+  final String transRef;
+  final FirebaseUser currentUser;
+  final PageController pageViewController;
   final String RedirectUrl, PAY_REQUEST_ID, PAYGATE_ID, CHECKSUM;
 
   @override

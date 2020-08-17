@@ -1,45 +1,48 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class BeneficiariesView extends StatefulWidget {
-  final String currentUserId;
+  final FirebaseUser currentUser;
+  final PageController pageViewController;
 
-  BeneficiariesView({this.currentUserId});
+  BeneficiariesView(
+      {Key key, @required this.currentUser, @required this.pageViewController})
+      : super(key: key);
 
   @override
-  State createState() =>
-      BeneficiariesViewState(currentUserId: this.currentUserId);
+  State createState() => BeneficiariesViewState();
 }
 
 class BeneficiariesViewState extends State<BeneficiariesView> {
-  final String currentUserId;
+  FirebaseUser currentUser;
+  PageController pageViewController;
 
-  BeneficiariesViewState({this.currentUserId});
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    currentUser = widget.currentUser;
+    pageViewController = widget.pageViewController;
+  }
 
   @override
   Widget build(BuildContext context) {
     return new ListView(
       children: <Widget>[
         AppBar(
-          actions: <Widget>[
-            IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, "/wallet");
-              },
-              icon: Icon(Icons.add_circle_outline),
-              color: Colors.blueAccent,
-            )
-          ],
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
           title: Text("Friends"),
           backgroundColor: Colors.white,
-          iconTheme: IconThemeData(color: Colors.blueAccent),
+          iconTheme: IconThemeData(color: Colors.brown),
           textTheme: TextTheme(
               headline6: TextStyle(
-                  color: Colors.blueAccent,
+                  color: Colors.brown,
                   fontSize: 20,
                   fontWeight: FontWeight.bold)),
           elevation: 0,
+          automaticallyImplyLeading: false,
         ),
         new ListTile(
           onTap: () {
@@ -61,14 +64,16 @@ class BeneficiariesViewState extends State<BeneficiariesView> {
                 });
           },
           leading: new CircleAvatar(
-            backgroundImage: new AssetImage("assets/images/smartwatch.jpg"),
+            backgroundImage: new AssetImage("assets/images/adduser.png"),
           ),
           title: new Text(
-            "Thapelo Radebe",
-            style: new TextStyle(fontWeight: FontWeight.bold),
+            "New Contact",
+            style:
+                new TextStyle(fontWeight: FontWeight.bold, color: Colors.brown),
           ),
-          subtitle: new Text(
-            "0725460987",
+          trailing: FaIcon(
+            FontAwesomeIcons.qrcode,
+            color: Colors.brown,
           ),
         ),
         new ListTile(

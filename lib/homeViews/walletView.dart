@@ -2,20 +2,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class WalletView extends StatefulWidget {
-  final FirebaseUser currentUser;
+  WalletView({@required this.currentUser, @required this.pageViewController});
 
-  WalletView({this.currentUser});
+  final FirebaseUser currentUser;
+  final PageController pageViewController;
 
   State createState() => WalletViewState();
 }
 
 class WalletViewState extends State<WalletView> {
   FirebaseUser currentUser;
+  PageController pageViewController;
 
   @override
   void initState() {
     super.initState();
     currentUser = widget.currentUser;
+    pageViewController = widget.pageViewController;
   }
 
   @override
@@ -24,34 +27,41 @@ class WalletViewState extends State<WalletView> {
       children: <Widget>[
         AppBar(
           actions: <Widget>[
-            FlatButton(
+            OutlineButton.icon(
               onPressed: () {
                 Navigator.pushNamed(context, "/wallet");
               },
-              child: Text(
-                'C0:00',
-                style: TextStyle(color: Colors.blueAccent, fontSize: 20.0),
+              icon: Icon(
+                Icons.add,
+                color: Colors.brown,
+              ),
+              label: Text(
+                'TOP UP',
+                style: TextStyle(
+                  color: Colors.brown,
+                ),
               ),
             )
           ],
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
           title: Text("Wallet"),
-          backgroundColor: Colors.blueAccent,
-          iconTheme: IconThemeData(color: Colors.white),
+          backgroundColor: Colors.white,
+          iconTheme: IconThemeData(color: Colors.brown),
           textTheme: TextTheme(
               headline6: TextStyle(
-                  color: Colors.white,
+                  color: Colors.brown,
                   fontSize: 20,
                   fontWeight: FontWeight.bold)),
           elevation: 0,
+          automaticallyImplyLeading: false,
         ),
         new Card(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(0))),
-            elevation: 0,
+            elevation: 1,
             margin: EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 8),
-            color: Colors.blueAccent,
+            color: Colors.white,
             child: Padding(
               padding: EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 0),
               child: new Column(
@@ -65,7 +75,7 @@ class WalletViewState extends State<WalletView> {
                   Text(
                     "R0.00",
                     style: TextStyle(
-                        fontSize: 28, letterSpacing: 4, color: Colors.white),
+                        fontSize: 48, letterSpacing: 4, color: Colors.brown),
                   ),
                   Divider(
                     height: 24,
@@ -82,13 +92,13 @@ class WalletViewState extends State<WalletView> {
                             "Account Holder",
                             style: TextStyle(
                                 fontSize: 9,
-                                color: Colors.white,
+                                color: Colors.brown,
                                 letterSpacing: 2),
                           ),
-                          Text("TP Radebe",
+                          Text(currentUser.displayName ?? "No Name",
                               style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
+                                  fontSize: 14,
+                                  color: Colors.brown,
                                   letterSpacing: 2))
                         ],
                       ),
@@ -99,13 +109,13 @@ class WalletViewState extends State<WalletView> {
                             "Connected Number",
                             style: TextStyle(
                                 fontSize: 9,
-                                color: Colors.white,
+                                color: Colors.brown,
                                 letterSpacing: 2),
                           ),
-                          Text("064****324",
+                          Text(currentUser.phoneNumber ?? "No number",
                               style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
+                                  fontSize: 14,
+                                  color: Colors.brown,
                                   letterSpacing: 2))
                         ],
                       )

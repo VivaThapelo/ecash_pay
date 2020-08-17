@@ -37,7 +37,7 @@ class PayPageState extends State<PayPage> {
   String merchantId;
   String merchantName;
   String merchantType;
-  String merchantLogoURL;
+  String merchantPhotoURL;
   String amount;
   final String currency = "R";
   BankCard bankCard;
@@ -46,6 +46,8 @@ class PayPageState extends State<PayPage> {
   String transStatus = "Started";
   PageController pageViewController;
 
+  bool _transactionLoading;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +55,7 @@ class PayPageState extends State<PayPage> {
     userAction = widget.userAction;
     currentUser = widget.currentUser;
     merchantId = widget.scanResults;
+    _transactionLoading = false;
     _textEditingController = new TextEditingController();
     getMerchant().whenComplete(() => (Map<String, dynamic> snapshot) {
           if (snapshot.isNotEmpty) {
@@ -69,8 +72,10 @@ class PayPageState extends State<PayPage> {
     tranxaction = new Tranxaction(
         txSourceID: currentUser.uid,
         txSourceName: currentUser.displayName,
+        txSourcePhoto: currentUser.photoUrl,
         txDestinationID: merchantId,
         txDestinationName: merchantName,
+        txDestinationPhoto: merchantPhotoURL,
         txAmount: double.parse(amount),
         txFee: (userAction.split(".")[1] == "Payment") ? 1.0 : 5.0,
         // PAY fee is R1, WITHDRAW fee is R5
@@ -276,65 +281,6 @@ class PayPageState extends State<PayPage> {
         title: new Text(
           "Enter Amount",
         ),
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.done),
-              onPressed: () {
-                setState(() {
-                  amount = _textEditingController.text;
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('CONFIRM TRANSACTION'),
-                          content: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Text("Action: " +
-                                  userAction
-                                      .toUpperCase()
-                                      .toString()
-                                      .split(".")[1] +
-                                  " ".toUpperCase()),
-                              Divider(
-                                height: 16,
-                              ),
-                              Text("Account: " + merchantName.toUpperCase()),
-                              Divider(
-                                height: 16,
-                              ),
-                              Text("Amount: " +
-                                  currency.toUpperCase() +
-                                  amount.toUpperCase()),
-                            ],
-                          ),
-                          actions: <Widget>[
-                            FlatButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text('No, Cancel'),
-                            ),
-                            FlatButton(
-                              onPressed: () {
-                                doTransaction();
-                              },
-                              child: Text(
-                                'Yes, Continue',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            )
-                          ],
-                        );
-                      });
-                });
-                /*  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => new PayConfirmPage())); */
-              }),
-        ],
       ),
       body: SafeArea(
         child: Column(
@@ -350,6 +296,7 @@ class PayPageState extends State<PayPage> {
                   if (snapshot.hasData) {
                     merchantName = snapshot.data['MerchantName'];
                     merchantType = snapshot.data['MerchantType'];
+                    merchantPhotoURL = snapshot.data['MerchantPhotoURL'];
                     return Card(
                         color: Colors.white70,
                         child: ListTile(
@@ -368,7 +315,7 @@ class PayPageState extends State<PayPage> {
                   }
                 }),
             Divider(
-              height: 18,
+              height: 8,
               color: Colors.transparent,
             ),
             TextFormField(
@@ -378,148 +325,231 @@ class PayPageState extends State<PayPage> {
               enabled: true,
               controller: _textEditingController,
               decoration: InputDecoration(
-                  prefixIcon: Icon(
-                    Icons.attach_money,
-                    color: Colors.grey,
-                    size: 48,
+                  prefixIcon: Text(
+                    'R',
+                    style: TextStyle(color: Colors.brown, fontSize: 48),
                   ),
-                  prefixStyle: TextStyle(color: Colors.blue, fontSize: 48),
+                  //prefixStyle: TextStyle(color: Colors.blue, fontSize: 48),
                   hintText: "0",
                   hintStyle: TextStyle(fontSize: 48, color: Colors.grey),
                   border: InputBorder.none),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 3,
-                children: <Widget>[
-                  //
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 1.toString();
-                        });
-                      },
-                      child: Text(
-                        '1',
-                        style: TextStyle(fontSize: 24),
-                      )),
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 2.toString();
-                        });
-                      },
-                      child: Text(
-                        '2',
-                        style: TextStyle(fontSize: 24),
-                      )),
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 3.toString();
-                        });
-                      },
-                      child: Text(
-                        '3',
-                        style: TextStyle(fontSize: 24),
-                      )),
-                  //
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 4.toString();
-                        });
-                      },
-                      child: Text(
-                        '4',
-                        style: TextStyle(fontSize: 24),
-                      )),
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 5.toString();
-                        });
-                      },
-                      child: Text(
-                        '5',
-                        style: TextStyle(fontSize: 24),
-                      )),
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 6.toString();
-                        });
-                      },
-                      child: Text(
-                        '6',
-                        style: TextStyle(fontSize: 24),
-                      )),
-                  //
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 7.toString();
-                        });
-                      },
-                      child: Text(
-                        '7',
-                        style: TextStyle(fontSize: 24),
-                      )),
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 8.toString();
-                        });
-                      },
-                      child: Text(
-                        '8',
-                        style: TextStyle(fontSize: 24),
-                      )),
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 9.toString();
-                        });
-                      },
-                      child: Text(
-                        '9',
-                        style: TextStyle(fontSize: 24),
-                      )),
+            GridView.count(
+              shrinkWrap: true,
+              crossAxisCount: 3,
+              children: <Widget>[
+                //
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 1.toString();
+                      });
+                    },
+                    child: Text(
+                      '1',
+                      style: TextStyle(fontSize: 24, color: Colors.brown),
+                    )),
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 2.toString();
+                      });
+                    },
+                    child: Text(
+                      '2',
+                      style: TextStyle(fontSize: 24, color: Colors.brown),
+                    )),
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 3.toString();
+                      });
+                    },
+                    child: Text(
+                      '3',
+                      style: TextStyle(fontSize: 24, color: Colors.brown),
+                    )),
+                //
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 4.toString();
+                      });
+                    },
+                    child: Text(
+                      '4',
+                      style: TextStyle(fontSize: 24, color: Colors.brown),
+                    )),
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 5.toString();
+                      });
+                    },
+                    child: Text(
+                      '5',
+                      style: TextStyle(fontSize: 24, color: Colors.brown),
+                    )),
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 6.toString();
+                      });
+                    },
+                    child: Text(
+                      '6',
+                      style: TextStyle(fontSize: 24, color: Colors.brown),
+                    )),
+                //
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 7.toString();
+                      });
+                    },
+                    child: Text(
+                      '7',
+                      style: TextStyle(fontSize: 24, color: Colors.brown),
+                    )),
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 8.toString();
+                      });
+                    },
+                    child: Text(
+                      '8',
+                      style: TextStyle(fontSize: 24, color: Colors.brown),
+                    )),
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 9.toString();
+                      });
+                    },
+                    child: Text(
+                      '9',
+                      style: TextStyle(fontSize: 24, color: Colors.brown),
+                    )),
 
-                  //
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += ".".toString();
-                        });
-                      },
-                      child: Text('.', style: TextStyle(fontSize: 24))),
-                  FlatButton(
-                      onPressed: () {
-                        setState(() {
-                          _textEditingController.text += 0.toString();
-                        });
-                      },
-                      child: Text('0', style: TextStyle(fontSize: 24))),
-                  IconButton(
-                      icon: Icon(
-                        Icons.backspace,
-                        color: Colors.black,
-                        size: 24,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          if (_textEditingController.text.length > 0) {
-                            _textEditingController.text =
-                                _textEditingController.text.substring(
-                                    0, _textEditingController.text.length - 1);
-                          }
-                        });
-                      })
-                ],
-              ),
+                //
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += ".".toString();
+                      });
+                    },
+                    child: Text('.',
+                        style: TextStyle(fontSize: 24, color: Colors.brown))),
+                FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _textEditingController.text += 0.toString();
+                      });
+                    },
+                    child: Text('0',
+                        style: TextStyle(fontSize: 24, color: Colors.brown))),
+                IconButton(
+                    icon: Icon(Icons.backspace, color: Colors.brown, size: 24),
+                    onPressed: () {
+                      setState(() {
+                        if (_textEditingController.text.length > 0) {
+                          _textEditingController.text =
+                              _textEditingController.text.substring(
+                                  0, _textEditingController.text.length - 1);
+                        }
+                      });
+                    })
+              ],
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: FlatButton(
+                  padding: EdgeInsets.symmetric(vertical: 4.0),
+                  color: Colors.brown,
+                  child: Text(
+                    (userAction.split(".")[1] == "Payment")
+                        ? "PAY"
+                        : "WITHDRAW",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      amount = _textEditingController.text;
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return StatefulBuilder(
+                              builder: (context, StateSetter dialogState) {
+                                return AlertDialog(
+                                  title: Row(
+                                    children: <Widget>[
+                                      Text('CONFIRM'),
+                                      Visibility(
+                                        child: CircularProgressIndicator(),
+                                        visible: _transactionLoading,
+                                      ),
+                                    ],
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                  ),
+                                  content: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Text("Action: " +
+                                          userAction
+                                              .toUpperCase()
+                                              .toString()
+                                              .split(".")[1] +
+                                          " ".toUpperCase()),
+                                      Divider(
+                                        height: 16,
+                                      ),
+                                      Text("Account: " +
+                                          merchantName.toUpperCase()),
+                                      Divider(
+                                        height: 16,
+                                      ),
+                                      Text("Amount: " +
+                                          currency.toUpperCase() +
+                                          amount.toUpperCase()),
+                                    ],
+                                  ),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('No, Cancel'),
+                                    ),
+                                    FlatButton(
+                                      onPressed: () {
+                                        dialogState(() {
+                                          _transactionLoading = true;
+                                        });
+                                        doTransaction();
+                                      },
+                                      child: Text(
+                                        'Yes, Continue',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    )
+                                  ],
+                                );
+                              },
+                            );
+                          });
+                    });
+                    /*  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => new PayConfirmPage())); */
+                  }),
             )
           ],
         ),

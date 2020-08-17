@@ -28,6 +28,7 @@ class ProfilePageState extends State<ProfilePage> {
   TextEditingController _firstController;
   TextEditingController _lastController;
   FocusNode _firstNode, _lastNode;
+  String proPic = "https://imgur.com/gallery/znlz0";
 
   StorageReference storageReference;
 
@@ -35,9 +36,10 @@ class ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     currentUser = widget.currentUser;
-
+    print("ProfilePage: " + "Works well");
     storageReference = FirebaseStorage.instance.ref();
-
+    getPlaceholder();
+    getProPic();
     _firstNode = FocusNode(canRequestFocus: true);
     _lastNode = FocusNode(canRequestFocus: true);
 
@@ -140,9 +142,8 @@ class ProfilePageState extends State<ProfilePage> {
                     foregroundColor: Colors.yellow,
                     child: Text('Click to Change'),
                     backgroundColor: Colors.grey,
-                    backgroundImage: NetworkImage(
-                        currentUser.photoUrl.toString() ?? placeholderURL,
-                        scale: .1),
+                    backgroundImage:
+                    NetworkImage(proPic ?? placeholderURL, scale: .1),
                   ),
                 ),
                 Divider(
@@ -237,6 +238,7 @@ class ProfilePageState extends State<ProfilePage> {
                         );
                         // Attempt to take a picture and log where it's been saved.
                         await _cameraController.takePicture(path);
+                        print("Image Path: " + path);
                         setState(() {
                           uploadFile(path);
                         });
@@ -263,18 +265,27 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   getPlaceholder() async {
-    String wateva =
-        await storageReference.child('/profileImages/').getDownloadURL();
+    print("getPlaceHolder:" + "runs");
+    String response = await storageReference
+        .child('profileImages')
+        .child('thumb')
+        .child('profile-placeholder_200x200.png')
+        .getDownloadURL();
     setState(() {
-      placeholderURL = wateva;
+      placeholderURL = response;
     });
   }
 
   getProPic() async {
-    await storageReference
-        .child('/profileImages/')
-        .child(currentUser.uid)
-        .getPath();
+    print("getProPic:" + "runs");
+    String response = await storageReference
+        .child('profileImages')
+        .child('thumb')
+        .child('${currentUser.uid}_200x200.png')
+        .getDownloadURL();
+    setState(() {
+      proPic = response;
+    });
   }
 
   Future uploadFile(_image) async {
@@ -286,10 +297,10 @@ class ProfilePageState extends State<ProfilePage> {
       await uploadTask.onComplete;
       print('File Uploaded');
       await storageReference
-          .child('profileImages/${currentUser.uid}.png')
+          .child('profileImages/thumb/${currentUser.uid}_200x200.png')
           .getDownloadURL()
-          .then((fileURL) async {
-        var imageFile = await fileURL;
+          .then((fileURL) {
+        var imageFile = fileURL;
         print(imageFile.toString());
         UserUpdateInfo userUpdateInfo = new UserUpdateInfo();
         userUpdateInfo.photoUrl = imageFile;
@@ -297,6 +308,8 @@ class ProfilePageState extends State<ProfilePage> {
         setState(() {
           imagePath = imageFile.toString();
         });
+      }).catchError((e) {
+        print("download error: " + e.toString());
       });
     } catch (e) {
       print("upload error: " + e.toString());

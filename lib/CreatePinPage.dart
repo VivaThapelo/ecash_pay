@@ -24,6 +24,7 @@ class CreatePinPageState extends State<CreatePinPage> {
   @override
   void initState() {
     super.initState();
+    print("CreatePinPage: " + "Works well");
     currentUser = widget.currentUser;
 
     _firstController = new TextEditingController(
@@ -224,7 +225,8 @@ class CreatePinPageState extends State<CreatePinPage> {
                                 _secondController.text +
                                 _thirdController.text +
                                 _forthController.text;
-                            if (appPin == inputPin && appPin != null) {
+                            // comparing current input to appPIn if it exists
+                            if (appPin != null && appPin == inputPin) {
                               print('appPin: ' + appPin);
                               // go somewhere
                               Navigator.push(
@@ -233,7 +235,10 @@ class CreatePinPageState extends State<CreatePinPage> {
                                       builder: (context) => MyHomePage(
                                           currentUser: currentUser)));
                             } else {
-                              clearAllAndRepeat("Pin Denied, Try Again");
+                              prefs.setString('appPin',
+                                  inputPin); // Storing the first PIN to use to current input
+                              print('appPin: ' + inputPin);
+                              clearAllAndRepeat("Please repeat to confirm");
                             }
                           });
                         },

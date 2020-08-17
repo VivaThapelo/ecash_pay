@@ -29,7 +29,7 @@ class PinPageState extends State<PinPage> {
   @override
   void initState() {
     super.initState();
-
+    print("PinPage: " + "Works well");
     SystemChannels.textInput.invokeMethod('TextInput.hide');
 
     currentUser = widget.currentUser;
